@@ -40,7 +40,7 @@ synproxy_build_ip(struct net *net, struct sk_buff *skb, __be32 saddr,
 	iph->tos	= 0;
 	iph->id		= 0;
 	iph->frag_off	= htons(IP_DF);
-	iph->ttl	= net->ipv4.sysctl_ip_default_ttl;
+	iph->ttl	= sysctl_ip_default_ttl;
 	iph->protocol	= IPPROTO_TCP;
 	iph->check	= 0;
 	iph->saddr	= saddr;
@@ -496,8 +496,10 @@ static void synproxy_tg4_destroy(const struct xt_tgdtor_param *par)
 static struct xt_target synproxy_tg4_reg __read_mostly = {
 	.name		= "SYNPROXY",
 	.family		= NFPROTO_IPV4,
-	.hooks		= (1 << NF_INET_LOCAL_IN) | (1 << NF_INET_FORWARD),
+	.hooks		= (1 << NF_INET_LOCAL_IN) | (1 << NF_INET_FORWARD) | (1 << NF_INET_PRE_ROUTING),
 	.target		= synproxy_tg4,
+	.table		= "raw",
+	.proto		= IPPROTO_TCP,
 	.targetsize	= sizeof(struct xt_synproxy_info),
 	.checkentry	= synproxy_tg4_check,
 	.destroy	= synproxy_tg4_destroy,
